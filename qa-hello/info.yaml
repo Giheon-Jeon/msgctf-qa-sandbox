@@ -2,7 +2,7 @@ name: QA Hello
 category: web
 description: |-
   DevSecOps QA용 더미 문제입니다.
-flag: MSGCTF{QA_DUMMY_NOT_A_REAL_FLAG}
+flag: MSGCTF{QA_CANARY_C2}
 
 deployment:
   runtime_type: KUBERNETES
