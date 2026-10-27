@@ -1,0 +1,49 @@
+name: QA 문제 공급망 검증
+
+on:
+  push:
+    branches: ["qa/**"]
+  workflow_dispatch:
+    inputs:
+      challenge_path:
+        required: false
+        default: qa-hello
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  sandbox-guard:
+    name: 샌드박스 쓰기 범위 확인
+    runs-on: ubuntu-latest
+    steps:
+      - name: 샌드박스 저장소에서만 실행
+        env:
+          REPO: ${{ github.repository }}
+        run: |
+          if [ "$REPO" != "Giheon-Jeon/msgctf-qa-sandbox" ]; then
+            echo "샌드박스 외 저장소에서는 실행하지 않습니다" >&2
+            exit 1
+          fi
+
+  # 운영 caller(2026_MSG_CTF publish-main)와 같은 reusable·고정 SHA 사용.
+  # image push 대상은 ghcr.io/<repository_owner>/... 이므로 ghcr.io/giheon-jeon/ 으로만 간다.
+  # Runtime smoke(K3s/HTTPS), GCS 업로드, 백엔드 dispatch는 모두 끈다.
+  supply-chain:
+    name: ${{ inputs.challenge_path || 'qa-hello' }} 공급망
+    needs: sandbox-guard
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+      security-events: write
+    uses: MSG-CTF/msgctf-devsecops/.github/workflows/challenge-supply-chain.yml@038426200bec2d7a87a7bb58c53bda70017b7c05
+    with:
+      challenge_path: ${{ inputs.challenge_path || 'qa-hello' }}
+      revision: ${{ github.run_number }}
+      devsecops_ref: 038426200bec2d7a87a7bb58c53bda70017b7c05
+      publish_images: true
+      enable_user_files_gcs_upload: false
+      enable_runtime_https_smoke: false
+      enable_k3s_smoke_deploy: false

@@ -1,0 +1,18 @@
+name: QA Hello
+category: web
+description: |-
+  DevSecOps QA용 더미 문제입니다.
+flag: MSGCTF{QA_DUMMY_NOT_A_REAL_FLAG}
+
+deployment:
+  runtime_type: KUBERNETES
+  architecture: AMD64
+  containers:
+    - name: app
+      build: ./prob/for_organizer/app
+      ports: [8080]
+      expose: true
+  resource_profile:
+    cpu_millicores: 100
+    memory_mib: 128
+    ephemeral_storage_mib: 256
